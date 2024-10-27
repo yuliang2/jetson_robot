@@ -12,6 +12,14 @@ gcc >= 7.5.0 (for Arm platform)
 
 run gcc --version  command to check your gcc version
 
+### environment
+```bash
+conda create -n A1_motor python=3.12
+conda activate A1_motor
+conda install -c conda-forge libgcc
+sudo /home/zuojia/miniconda3/envs/A1_motor/bin/python3 example_a1_motor.py
+```
+
 ### Build
 ```bash
 mkdir build
