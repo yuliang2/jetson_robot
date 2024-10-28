@@ -112,10 +112,10 @@ class A1_Motor:
         return self.data
 
     def SetLimitTau(self, max_tau, min_tau):
-        assert max_tau <= 823549 / self.reduction_ratio, "max_tau should less or equal to 823549 / reduction_ratio"
-        assert max_tau >= - 823549 / self.reduction_ratio, "max_tau should more or equal to - 823549 / reduction_ratio"
-        assert min_tau <= 823549 / self.reduction_ratio, "min_tau should less or equal to 823549 / reduction_ratio"
-        assert min_tau >= - 823549 / self.reduction_ratio, "min_tau should more or equal to - 823549 / reduction_ratio"
+        assert max_tau <= 128, "max_tau should less or equal to 128"
+        assert max_tau >= - 128, "max_tau should more or equal to - 128"
+        assert min_tau <= 128, "min_tau should less or equal to 128"
+        assert min_tau >= - 128, "min_tau should more or equal to - 128"
 
         self.max_tau = max_tau
         self.min_tau = min_tau
@@ -143,13 +143,13 @@ class A1_Motor:
         Cotrol Motor by absolute position. And can refresh the latest motor status.
 
         Args:
-            abs_pos (float, 0-1024): aim position.
+            tau (float, -128 ~ 128): torque
+            abs_pos (float, - 823549 / self.reduction_ratio ~ 823549 / self.reduction_ratio): aim position.
         Return:
             True: Set success.
             False: Set failed, target position exceeded limits.
         """
-        # TODO: other params, auto control?
-        if abs_pos > self.max_angle or abs_pos < self.min_angle:
+        if abs_pos > self.max_angle or abs_pos < self.min_angle or tau > self.max_tau or tau < self.min_tau:
             return False
         self.cmd.mode = 10  # FOC
         self.cmd.q    = abs_pos * self.reduction_ratio
@@ -163,16 +163,16 @@ class A1_Motor:
         Cotrol Motor by incremental position. And can refresh the latest motor status.
 
         Args:
-            pos (float, 0-1024): aim position.
+            tau (float, -128 ~ 128): torque
+            inc_pos (float): incremental position, incremental position + absolute position \
+                should >= (- 823549 / self.reduction_ratio) and <= (823549 / self.reduction_ratio).
         Return:
             True: Set success.
             False: Set failed, target position exceeded limits.
         """
-        # TODO: other params, auto control?
-        # self.serial.sendRecv(self.cmd, self.data)
-        abs_pos = self.data.q/self.reduction_ratio
+        abs_pos = self.data.q / self.reduction_ratio
         aim_abs_pos = abs_pos + inc_pos
-        if aim_abs_pos > self.max_angle or aim_abs_pos < self.min_angle:
+        if aim_abs_pos > self.max_angle or aim_abs_pos < self.min_angle or tau > self.max_tau or tau < self.min_tau:
             return False
         self.cmd.mode = 10  # FOC
         self.cmd.q    = aim_abs_pos * self.reduction_ratio
