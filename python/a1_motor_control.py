@@ -215,17 +215,23 @@ time.sleep(0.5)
 
 motor1.SetParams(0.2, 1.0)
 
-motor1.AbsPosControl(0, 0)
+motor1.ReadData()
+motor1.ReadData()
+
+
+print('position: ', motor1.data.q/motor1.reduction_ratio)
+# motor1.AbsPosControl(0, 0)
+motor1.IncPosControl(0, 0)
 time.sleep(1)
 motor1.ReadData()
 print('position: ', motor1.data.q/motor1.reduction_ratio)
 
-motor1.IncPosControl(0, 0.2)
-time.sleep(1)
-motor1.ReadData()
-print('position: ', motor1.data.q/motor1.reduction_ratio)
+# motor1.IncPosControl(0, 0.2)
+# time.sleep(1)
+# motor1.ReadData()
+# print('position: ', motor1.data.q/motor1.reduction_ratio)
 
-motor1.IncPosControl(0, -0.1)
-time.sleep(1)
-motor1.ReadData()
-print('position: ', motor1.data.q/motor1.reduction_ratio)
+# motor1.IncPosControl(0, -0.1)
+# time.sleep(1)
+# motor1.ReadData()
+# print('position: ', motor1.data.q/motor1.reduction_ratio)
