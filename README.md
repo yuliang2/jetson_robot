@@ -17,7 +17,6 @@ run gcc --version  command to check your gcc version
 conda create -n A1_motor python=3.12
 conda activate A1_motor
 conda install -c conda-forge libgcc
-sudo /home/zuojia/miniconda3/envs/A1_motor/bin/python3 example_a1_motor.py
 ```
 
 ### Build
@@ -37,7 +36,21 @@ sudo ./example_a1_motor
 If you need to run the Python example, please enter the "python" folder. Then run the examples with 'sudo', for example:
 ```python
 sudo python3 example_a1_motor.py
+sudo /home/orin/miniconda3/envs/A1_motor/bin/python3 a1_motor_control.py
 ```
+
+### Change ID
+```bash
+cd /dev
+ls | grep ttyUSB
+```
+You can see the USB devices. Then connect **only one** motor on this device.
+
+```bash
+cd build
+sudo ./changeID
+```
+
 
 ### Tip
 
