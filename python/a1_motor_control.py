@@ -181,6 +181,19 @@ class A1_Motor:
         self.serial.sendRecv(self.cmd, self.data)
         return True
 
+    def DamplingControl(self):
+        r"""
+        Dampling control.
+        """
+        self.cmd.mode = 10  # FOC
+        self.cmd.q = 0
+        self.cmd.dq = 0
+        self.cmd.kp = 0
+        self.cmd.kd = 1.0
+        self.cmd.tau = 0
+        self.serial.sendRecv(self.cmd, self.data)
+        return True
+
 
 # params = A1_Params()
 # motor1 = A1_Motor(serial_id=0, motor_id=0, 
@@ -231,64 +244,75 @@ motor10 = A1_Motor(serial_id=3, motor_id=1,
 
 time.sleep(0.5)
 
-motor1.SetParams(0.2, 1.0)
-motor1.ReadData()
-motor1.ReadData()
+motor1.DamplingControl()
+motor2.DamplingControl()
+motor3.DamplingControl()
+motor4.DamplingControl()
+motor5.DamplingControl()
+motor6.DamplingControl()
+motor7.DamplingControl()
+motor8.DamplingControl()
+motor9.DamplingControl()
+motor10.DamplingControl()
 
-motor2.SetParams(0.2, 1.0)
-motor2.ReadData()
-motor2.ReadData()
+# motor1.SetParams(0.2, 1.0)
+# motor1.ReadData()
+# motor1.ReadData()
 
-motor3.SetParams(0.2, 1.0)
-motor3.ReadData()
-motor3.ReadData()
+# motor2.SetParams(0.2, 1.0)
+# motor2.ReadData()
+# motor2.ReadData()
 
-motor4.SetParams(0.2, 1.0)
-motor4.ReadData()
-motor4.ReadData()
+# motor3.SetParams(0.2, 1.0)
+# motor3.ReadData()
+# motor3.ReadData()
 
-motor5.SetParams(0.2, 1.0)
-motor5.ReadData()
-motor5.ReadData()
+# motor4.SetParams(0.2, 1.0)
+# motor4.ReadData()
+# motor4.ReadData()
 
-motor6.SetParams(0.2, 1.0)
-motor6.ReadData()
-motor6.ReadData()
+# motor5.SetParams(0.2, 1.0)
+# motor5.ReadData()
+# motor5.ReadData()
 
-motor7.SetParams(0.2, 1.0)
-motor7.ReadData()
-motor7.ReadData()
+# motor6.SetParams(0.2, 1.0)
+# motor6.ReadData()
+# motor6.ReadData()
 
-motor8.SetParams(0.2, 1.0)
-motor8.ReadData()
-motor8.ReadData()
+# motor7.SetParams(0.2, 1.0)
+# motor7.ReadData()
+# motor7.ReadData()
 
-motor9.SetParams(0.2, 1.0)
-motor9.ReadData()
-motor9.ReadData()
+# motor8.SetParams(0.2, 1.0)
+# motor8.ReadData()
+# motor8.ReadData()
 
-motor10.SetParams(0.2, 1.0)
-motor10.ReadData()
-motor10.ReadData()
+# motor9.SetParams(0.2, 1.0)
+# motor9.ReadData()
+# motor9.ReadData()
 
-time.sleep(0.5)
-time.sleep(0.5)
+# motor10.SetParams(0.2, 1.0)
+# motor10.ReadData()
+# motor10.ReadData()
 
-print('position: ', motor1.data.q/motor1.reduction_ratio)
-# motor1.AbsPosControl(0, 0)
-motor1.IncPosControl(0, 0)
-motor2.IncPosControl(0, 0)
-motor3.IncPosControl(0, 0)
-motor4.IncPosControl(0, 0)
-motor5.IncPosControl(0, 0)
-motor6.IncPosControl(0, 0)
-motor7.IncPosControl(0, 0)
-motor8.IncPosControl(0, 0)
-motor9.IncPosControl(0, 0)
-motor10.IncPosControl(0, 0)
-time.sleep(1)
-motor1.ReadData()
-print('position: ', motor1.data.q/motor1.reduction_ratio)
+# time.sleep(0.5)
+# time.sleep(0.5)
+
+# print('position: ', motor1.data.q/motor1.reduction_ratio)
+# # motor1.AbsPosControl(0, 0)
+# motor1.IncPosControl(0, 0)
+# motor2.IncPosControl(0, 0)
+# motor3.IncPosControl(0, 0)
+# motor4.IncPosControl(0, 0)
+# motor5.IncPosControl(0, 0)
+# motor6.IncPosControl(0, 0)
+# motor7.IncPosControl(0, 0)
+# motor8.IncPosControl(0, 0)
+# motor9.IncPosControl(0, 0)
+# motor10.IncPosControl(0, 0)
+# time.sleep(1)
+# motor1.ReadData()
+# print('position: ', motor1.data.q/motor1.reduction_ratio)
 
 # motor1.IncPosControl(0, 0.2)
 # time.sleep(1)
