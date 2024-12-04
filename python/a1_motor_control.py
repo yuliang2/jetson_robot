@@ -82,7 +82,7 @@ class A1_Motor:
         self.cmd.motorType = MotorType.A1
 
         self.cmd.mode = mode
-        self.cmd.id   = 0
+        self.cmd.id   = self.motor_id
         self.cmd.q    = 0.0
         self.cmd.dq   = 0.0
         self.cmd.kp   = 0.0
@@ -210,18 +210,82 @@ class A1_Motor:
 params = A1_Params()
 motor1 = A1_Motor(serial_id=0, motor_id=0, 
                   mode=params.ModeType.STOP, reduction_ratio=9.2)
+motor2 = A1_Motor(serial_id=0, motor_id=1, 
+                  mode=params.ModeType.STOP, reduction_ratio=9.2)
+motor3 = A1_Motor(serial_id=0, motor_id=2, 
+                  mode=params.ModeType.STOP, reduction_ratio=9.2)
+motor4 = A1_Motor(serial_id=1, motor_id=0, 
+                  mode=params.ModeType.STOP, reduction_ratio=9.2)
+motor5 = A1_Motor(serial_id=1, motor_id=1, 
+                  mode=params.ModeType.STOP, reduction_ratio=9.2)
+motor6 = A1_Motor(serial_id=1, motor_id=2, 
+                  mode=params.ModeType.STOP, reduction_ratio=9.2)
+motor7 = A1_Motor(serial_id=2, motor_id=0, 
+                  mode=params.ModeType.STOP, reduction_ratio=9.2)
+motor8 = A1_Motor(serial_id=2, motor_id=1, 
+                  mode=params.ModeType.STOP, reduction_ratio=9.2)
+motor9 = A1_Motor(serial_id=3, motor_id=0, 
+                  mode=params.ModeType.STOP, reduction_ratio=9.2)
+motor10 = A1_Motor(serial_id=3, motor_id=1, 
+                  mode=params.ModeType.STOP, reduction_ratio=9.2)
 
 time.sleep(0.5)
 
 motor1.SetParams(0.2, 1.0)
-
 motor1.ReadData()
 motor1.ReadData()
 
+motor2.SetParams(0.2, 1.0)
+motor2.ReadData()
+motor2.ReadData()
+
+motor3.SetParams(0.2, 1.0)
+motor3.ReadData()
+motor3.ReadData()
+
+motor4.SetParams(0.2, 1.0)
+motor4.ReadData()
+motor4.ReadData()
+
+motor5.SetParams(0.2, 1.0)
+motor5.ReadData()
+motor5.ReadData()
+
+motor6.SetParams(0.2, 1.0)
+motor6.ReadData()
+motor6.ReadData()
+
+motor7.SetParams(0.2, 1.0)
+motor7.ReadData()
+motor7.ReadData()
+
+motor8.SetParams(0.2, 1.0)
+motor8.ReadData()
+motor8.ReadData()
+
+motor9.SetParams(0.2, 1.0)
+motor9.ReadData()
+motor9.ReadData()
+
+motor10.SetParams(0.2, 1.0)
+motor10.ReadData()
+motor10.ReadData()
+
+time.sleep(0.5)
+time.sleep(0.5)
 
 print('position: ', motor1.data.q/motor1.reduction_ratio)
 # motor1.AbsPosControl(0, 0)
 motor1.IncPosControl(0, 0)
+motor2.IncPosControl(0, 0)
+motor3.IncPosControl(0, 0)
+motor4.IncPosControl(0, 0)
+motor5.IncPosControl(0, 0)
+motor6.IncPosControl(0, 0)
+motor7.IncPosControl(0, 0)
+motor8.IncPosControl(0, 0)
+motor9.IncPosControl(0, 0)
+motor10.IncPosControl(0, 0)
 time.sleep(1)
 motor1.ReadData()
 print('position: ', motor1.data.q/motor1.reduction_ratio)
