@@ -2,6 +2,7 @@
 
 import time
 import sys
+import os
 from a1_parameters_setting import A1_Params
 sys.path.append('../lib')
 from unitree_actuator_sdk import *
@@ -29,7 +30,15 @@ class A1_Motor:
         assert mode in [0, 10], "mode should be 0-stop or 10-FOC"
 
         self.motor_id = motor_id
-        self.serial_name = f'/dev/ttyUSB{serial_id}'
+
+        # 优先选择自己绑定的/dev/my485serial*,备选/dev/ttyUSB*，不存在则报错
+        if os.path.exists(f'/dev/my485serial{serial_id}'):
+            self.serial_name = f'/dev/my485serial{serial_id}'
+        elif os.path.exists(f'/dev/ttyUSB{serial_id}'):
+            self.serial_name = f'/dev/ttyUSB{serial_id}'
+        else:
+            raise ValueError("The serial dos not exist.")
+
         self.serial = SerialPort(self.serial_name)
         self.reduction_ratio = reduction_ratio
 
@@ -194,132 +203,117 @@ class A1_Motor:
         self.serial.sendRecv(self.cmd, self.data)
         return True
 
+# A1电机请用扩展坞接到Orin左下角的USB插口，并不要交换四个转接器的位置！
+# 串口ID：0左腿，1左髋，2右髋，3右腿
+# motor： 1左腿侧抬腿，2左膝盖前后，3左脚踝,4左腿旋转，5左大腿上抬，6右腿旋转，7右大腿上抬，8右腿侧抬腿，9右膝盖前后，10右脚踝
 
-# params = A1_Params()
-# motor1 = A1_Motor(serial_id=0, motor_id=0, 
-#                   mode=params.ModeType.STOP, reduction_ratio=9.2)
+def main():
+    params = A1_Params()
+    motor1 = A1_Motor(serial_id=0, motor_id=0, 
+                    mode=params.ModeType.STOP, reduction_ratio=9.2)
+    motor2 = A1_Motor(serial_id=0, motor_id=1, 
+                    mode=params.ModeType.STOP, reduction_ratio=9.2)
+    motor3 = A1_Motor(serial_id=0, motor_id=2, 
+                    mode=params.ModeType.STOP, reduction_ratio=9.2)
 
-# time.sleep(0.5)
+    motor4 = A1_Motor(serial_id=1, motor_id=0, 
+                    mode=params.ModeType.STOP, reduction_ratio=9.2)
+    motor5 = A1_Motor(serial_id=1, motor_id=1, 
+                    mode=params.ModeType.STOP, reduction_ratio=9.2)
 
-# motor1.SetParams(0.2, 1.0)
+    motor6 = A1_Motor(serial_id=2, motor_id=0, 
+                    mode=params.ModeType.STOP, reduction_ratio=9.2)
+    motor7 = A1_Motor(serial_id=2, motor_id=1, 
+                    mode=params.ModeType.STOP, reduction_ratio=9.2)
 
-# motor1.AbsPosControl(0, 0)
-# time.sleep(1)
-# motor1.ReadData()
-# print('position: ', motor1.data.q/motor1.reduction_ratio)
+    motor8 = A1_Motor(serial_id=3, motor_id=0, 
+                    mode=params.ModeType.STOP, reduction_ratio=9.2)
+    motor9 = A1_Motor(serial_id=3, motor_id=1, 
+                    mode=params.ModeType.STOP, reduction_ratio=9.2)
+    motor10 = A1_Motor(serial_id=3, motor_id=2, 
+                    mode=params.ModeType.STOP, reduction_ratio=9.2)
 
-# motor1.AbsPosControl(0, 1.57)
-# time.sleep(1)
-# motor1.ReadData()
-# print('position: ', motor1.data.q/motor1.reduction_ratio)
+    time.sleep(0.5)
 
-# motor1.AbsPosControl(0, 3.14)
-# time.sleep(1)
-# motor1.ReadData()
-# print('position: ', motor1.data.q/motor1.reduction_ratio)
+    motor1.DamplingControl()
+    motor2.DamplingControl()
+    motor3.DamplingControl()
+    motor4.DamplingControl()
+    motor5.DamplingControl()
+    motor6.DamplingControl()
+    motor7.DamplingControl()
+    motor8.DamplingControl()
+    motor9.DamplingControl()
+    motor10.DamplingControl()
 
+    # motor1.SetParams(0.2, 1.0)
+    # motor1.ReadData()
+    # motor1.ReadData()
 
+    # motor2.SetParams(0.2, 1.0)
+    # motor2.ReadData()
+    # motor2.ReadData()
 
-params = A1_Params()
-motor1 = A1_Motor(serial_id=0, motor_id=0, 
-                  mode=params.ModeType.STOP, reduction_ratio=9.2)
-motor2 = A1_Motor(serial_id=0, motor_id=1, 
-                  mode=params.ModeType.STOP, reduction_ratio=9.2)
-motor3 = A1_Motor(serial_id=0, motor_id=2, 
-                  mode=params.ModeType.STOP, reduction_ratio=9.2)
-motor4 = A1_Motor(serial_id=1, motor_id=0, 
-                  mode=params.ModeType.STOP, reduction_ratio=9.2)
-motor5 = A1_Motor(serial_id=1, motor_id=1, 
-                  mode=params.ModeType.STOP, reduction_ratio=9.2)
-motor6 = A1_Motor(serial_id=1, motor_id=2, 
-                  mode=params.ModeType.STOP, reduction_ratio=9.2)
-motor7 = A1_Motor(serial_id=2, motor_id=0, 
-                  mode=params.ModeType.STOP, reduction_ratio=9.2)
-motor8 = A1_Motor(serial_id=2, motor_id=1, 
-                  mode=params.ModeType.STOP, reduction_ratio=9.2)
-motor9 = A1_Motor(serial_id=3, motor_id=0, 
-                  mode=params.ModeType.STOP, reduction_ratio=9.2)
-motor10 = A1_Motor(serial_id=3, motor_id=1, 
-                  mode=params.ModeType.STOP, reduction_ratio=9.2)
+    # motor3.SetParams(0.2, 1.0)
+    # motor3.ReadData()
+    # motor3.ReadData()
 
-time.sleep(0.5)
+    # motor4.SetParams(0.2, 1.0)
+    # motor4.ReadData()
+    # motor4.ReadData()
 
-motor1.DamplingControl()
-motor2.DamplingControl()
-motor3.DamplingControl()
-motor4.DamplingControl()
-motor5.DamplingControl()
-motor6.DamplingControl()
-motor7.DamplingControl()
-motor8.DamplingControl()
-motor9.DamplingControl()
-motor10.DamplingControl()
+    # motor5.SetParams(0.2, 1.0)
+    # motor5.ReadData()
+    # motor5.ReadData()
 
-# motor1.SetParams(0.2, 1.0)
-# motor1.ReadData()
-# motor1.ReadData()
+    # motor6.SetParams(0.2, 1.0)
+    # motor6.ReadData()
+    # motor6.ReadData()
 
-# motor2.SetParams(0.2, 1.0)
-# motor2.ReadData()
-# motor2.ReadData()
+    # motor7.SetParams(0.2, 1.0)
+    # motor7.ReadData()
+    # motor7.ReadData()
 
-# motor3.SetParams(0.2, 1.0)
-# motor3.ReadData()
-# motor3.ReadData()
+    # motor8.SetParams(0.2, 1.0)
+    # motor8.ReadData()
+    # motor8.ReadData()
 
-# motor4.SetParams(0.2, 1.0)
-# motor4.ReadData()
-# motor4.ReadData()
+    # motor9.SetParams(0.2, 1.0)
+    # motor9.ReadData()
+    # motor9.ReadData()
 
-# motor5.SetParams(0.2, 1.0)
-# motor5.ReadData()
-# motor5.ReadData()
+    # motor10.SetParams(0.2, 1.0)
+    # motor10.ReadData()
+    # motor10.ReadData()
 
-# motor6.SetParams(0.2, 1.0)
-# motor6.ReadData()
-# motor6.ReadData()
+    # time.sleep(0.5)
+    # time.sleep(0.5)
 
-# motor7.SetParams(0.2, 1.0)
-# motor7.ReadData()
-# motor7.ReadData()
+    # print('position: ', motor1.data.q/motor1.reduction_ratio)
+    # # motor1.AbsPosControl(0, 0)
+    # motor1.IncPosControl(0, 0)
+    # motor2.IncPosControl(0, 0)
+    # motor3.IncPosControl(0, 0)
+    # motor4.IncPosControl(0, 0)
+    # motor5.IncPosControl(0, 0)
+    # motor6.IncPosControl(0, 0)
+    # motor7.IncPosControl(0, 0)
+    # motor8.IncPosControl(0, 0)
+    # motor9.IncPosControl(0, 0)
+    # motor10.IncPosControl(0, 0)
+    # time.sleep(1)
+    # motor1.ReadData()
+    # print('position: ', motor1.data.q/motor1.reduction_ratio)
 
-# motor8.SetParams(0.2, 1.0)
-# motor8.ReadData()
-# motor8.ReadData()
+    # motor1.IncPosControl(0, 0.2)
+    # time.sleep(1)
+    # motor1.ReadData()
+    # print('position: ', motor1.data.q/motor1.reduction_ratio)
 
-# motor9.SetParams(0.2, 1.0)
-# motor9.ReadData()
-# motor9.ReadData()
+    # motor1.IncPosControl(0, -0.1)
+    # time.sleep(1)
+    # motor1.ReadData()
+    # print('position: ', motor1.data.q/motor1.reduction_ratio)
 
-# motor10.SetParams(0.2, 1.0)
-# motor10.ReadData()
-# motor10.ReadData()
-
-# time.sleep(0.5)
-# time.sleep(0.5)
-
-# print('position: ', motor1.data.q/motor1.reduction_ratio)
-# # motor1.AbsPosControl(0, 0)
-# motor1.IncPosControl(0, 0)
-# motor2.IncPosControl(0, 0)
-# motor3.IncPosControl(0, 0)
-# motor4.IncPosControl(0, 0)
-# motor5.IncPosControl(0, 0)
-# motor6.IncPosControl(0, 0)
-# motor7.IncPosControl(0, 0)
-# motor8.IncPosControl(0, 0)
-# motor9.IncPosControl(0, 0)
-# motor10.IncPosControl(0, 0)
-# time.sleep(1)
-# motor1.ReadData()
-# print('position: ', motor1.data.q/motor1.reduction_ratio)
-
-# motor1.IncPosControl(0, 0.2)
-# time.sleep(1)
-# motor1.ReadData()
-# print('position: ', motor1.data.q/motor1.reduction_ratio)
-
-# motor1.IncPosControl(0, -0.1)
-# time.sleep(1)
-# motor1.ReadData()
-# print('position: ', motor1.data.q/motor1.reduction_ratio)
+if __name__ == "__main__":
+    main()
