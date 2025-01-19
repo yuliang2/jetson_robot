@@ -14,7 +14,7 @@ import time
 
 def log(msg):
     print(msg)
-    if log_q != None:
+    if log_q and log_q is not None:
         log_q.put(msg)
 
 
@@ -105,10 +105,37 @@ class Com(Process):
             self.task()
             time.sleep(1)
 
+class PosPublish(Process):
+    def __init__(self, command_q=None, output=False, log_q=None):
+        Process.__init__(self)
+        self.command_q = command_q
+        self.output = output
+        self.log_q = log_q
+
+    def run(self):
+        global log_q
+        log_q = self.log_q
+        log("位置发布进程启动")
+
+        self.command_q.put({'A': 2166, 'B': 1724, 'C': 1824, 'D': 1519, 'E': 2178, 'F': 1227, 'G': 430, 'H': 1973})
+        time.sleep(1)
+
+        while True:
+            self.command_q.put({'A': 2266, 'B': 1724, 'C': 1824, 'D': 1519, 'E': 2178, 'F': 1227, 'G': 430, 'H': 1973})
+            # self.command_q.put({'A': 2266, 'B': 1824, 'C': 2024, 'D': 1619, 'E': 2278, 'F': 1327, 'G': 630, 'H': 2073})
+            time.sleep(1)
+            self.command_q.put({'A': 2166, 'B': 1724, 'C': 1824, 'D': 1519, 'E': 2278, 'F': 1227, 'G': 430, 'H': 1973})
+            # self.command_q.put({'A': 2166, 'B': 1724, 'C': 1824, 'D': 1519, 'E': 2178, 'F': 1227, 'G': 430, 'H': 1973})
+            # self.command_q.put({'A': 2066, 'B': 1624, 'C': 1824, 'D': 1419, 'E': 2078, 'F': 1127, 'G': 430, 'H': 1873})
+            time.sleep(1)
+
 if __name__ == "__main__":
     command_q = Queue(maxsize=10)
-    command_q.put({'A':2048, 'B':2048, 'C':2048, 'D':2048, 'E':2048, 'F':2048, 'G':2048, 'H':2048})
-    com = Com(port="COM6", command_q=command_q, output=True)
-    com.run()
-    # comm.start()
-    # comm.join()
+    command_q.put({'A': 2166, 'B': 1724, 'C': 1824, 'D': 1519, 'E': 2178, 'F': 1227, 'G': 430, 'H': 1973})
+    com = Com(port="/dev/ttyUSB4", command_q=command_q, output=True)
+    pos_publish = PosPublish(command_q=command_q, output=True)
+    # com.run()
+    com.start()
+    pos_publish.start()
+    com.join()
+    pos_publish.join()

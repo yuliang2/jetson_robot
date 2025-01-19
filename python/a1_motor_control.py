@@ -22,14 +22,19 @@ class A1_Motor:
             and the motor will stop rotating. 
         reduction_ratio (float): reduction ratio of motor, for A1 always be 9.1.
     """
-    def __init__(self, serial_id, motor_id, mode, reduction_ratio=9.1, 
-                 max_angle=None, min_angle=None, max_speed=None, min_speed=None, 
+    def __init__(self, serial_id, motor_id, mode, reduction_ratio=9.1, pos_init_offset=0,
+                 max_angle=None, min_angle=None, max_speed=None, min_speed=None,
                  max_tau=None, min_tau=None):
         assert serial_id in [0, 1, 2, 3], "serial_id should be 0, 1, 2 or 3"
         assert motor_id in [0, 1, 2], "motor_id should be 0, 1 or 2"
         assert mode in [0, 10], "mode should be 0-stop or 10-FOC"
 
         self.motor_id = motor_id
+
+        self.pos_init_offset = pos_init_offset
+        # pos_offset：单圈绝对编码器对于最大位置的相对偏移量，是除以reduction_ratio的较小值。
+        self.pos_offset = 0
+        # pos_offset: 电机在实际运行中，绝对位置控制时需要添加的偏移量，是除以reduction_ratio的较小值。
 
         # 优先选择自己绑定的/dev/my485serial*,备选/dev/ttyUSB*，不存在则报错
         if os.path.exists(f'/dev/my485serial{serial_id}'):
@@ -147,7 +152,7 @@ class A1_Motor:
         self.max_speed = max_speed
         self.min_speed = min_speed
 
-    def AbsPosControl(self, tau, abs_pos):
+    def AbsPosControlWithoutOffset(self, tau, abs_pos):
         r"""
         Cotrol Motor by absolute position. And can refresh the latest motor status.
 
@@ -162,10 +167,13 @@ class A1_Motor:
             return False
         self.cmd.mode = 10  # FOC
         self.cmd.q    = abs_pos * self.reduction_ratio
-        self.cmd.dq   = 0.0
+        self.cmd.dq   = 0.00001
         self.cmd.tau  = tau
         self.serial.sendRecv(self.cmd, self.data)
         return True
+
+    def AbsPosControl(self, tau, abs_pos):
+        self.AbsPosControlWithoutOffset(tau, abs_pos+self.pos_offset)
 
     def IncPosControl(self, tau, inc_pos):
         r"""
@@ -185,7 +193,7 @@ class A1_Motor:
             return False
         self.cmd.mode = 10  # FOC
         self.cmd.q    = aim_abs_pos * self.reduction_ratio
-        self.cmd.dq   = 0.0
+        self.cmd.dq   = 0.01
         self.cmd.tau  = tau
         self.serial.sendRecv(self.cmd, self.data)
         return True
@@ -202,6 +210,35 @@ class A1_Motor:
         self.cmd.tau = 0
         self.serial.sendRecv(self.cmd, self.data)
         return True
+
+    def TorqueControl(self, tau):
+        r"""
+        Control Motor by applying a specified torque. The function also
+        updates the motor's current status.
+
+        Args:
+            tau (float, -128 ~ 128): torque to be applied.
+
+        Return:
+            True: Torque set successfully.
+            False: Torque set failed, torque value exceeded limits.
+        """
+        if tau > self.max_tau or tau < self.min_tau:
+            return False
+        self.cmd.mode = 10  # FOC
+        self.cmd.q = 0
+        self.cmd.dq = 0
+        self.cmd.kp = 0.0
+        self.cmd.kd = 0.0
+        self.cmd.tau = tau
+        self.serial.sendRecv(self.cmd, self.data)
+        return True
+
+    def MotorStop(self):
+        self.cmd.mode = 0
+        self.serial.sendRecv(self.cmd, self.data)
+
+
 
 # A1电机请用扩展坞接到Orin左下角的USB插口，并不要交换四个转接器的位置！
 # 串口ID：0左腿，1左髋，2右髋，3右腿
