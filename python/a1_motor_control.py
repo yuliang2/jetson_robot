@@ -25,7 +25,7 @@ class A1_Motor:
     def __init__(self, serial_id, motor_id, mode, reduction_ratio=9.1, pos_init_offset=0,
                  max_angle=None, min_angle=None, max_speed=None, min_speed=None,
                  max_tau=None, min_tau=None):
-        assert serial_id in [0, 1, 2, 3], "serial_id should be 0, 1, 2 or 3"
+        assert serial_id in [0, 1, 2, 3, 5], "serial_id should be 0, 1, 2 or 3. 5 is for test only"
         assert motor_id in [0, 1, 2], "motor_id should be 0, 1 or 2"
         assert mode in [0, 10], "mode should be 0-stop or 10-FOC"
 
@@ -167,7 +167,7 @@ class A1_Motor:
             return False
         self.cmd.mode = 10  # FOC
         self.cmd.q    = abs_pos * self.reduction_ratio
-        self.cmd.dq   = 0.00001
+        self.cmd.dq   = 0.0
         self.cmd.tau  = tau
         self.serial.sendRecv(self.cmd, self.data)
         return True
