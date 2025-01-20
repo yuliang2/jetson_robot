@@ -50,7 +50,7 @@ class Com(Process):
                 continue
             else:
                 s += str(v) + k
-        return s + '>\r\n'
+        return s + '>C\r\n'
 
     def task(self):
         if self.port is None:
@@ -89,8 +89,12 @@ class Com(Process):
             if self.command_q and not self.command_q.empty():
                 command = self.command_q.get()
                 s = self.command_encode(command).encode()
-                ser.write(s)
-                ser.flush()
+            else:
+                s = b"<>C\r\n"
+            if self.output:
+                log(s)
+            ser.write(s)
+            ser.flush()
 
             time.sleep(0.1)
 
@@ -117,22 +121,22 @@ class PosPublish(Process):
         log_q = self.log_q
         log("位置发布进程启动")
 
-        self.command_q.put({'A': 2166, 'B': 1724, 'C': 1824, 'D': 1519, 'E': 2178, 'F': 1227, 'G': 430, 'H': 1973})
-        time.sleep(1)
+        # self.command_q.put({'A': 2166, 'B': 1724, 'C': 1824, 'D': 1519, 'E': 2178, 'F': 1227, 'G': 430, 'H': 1973})
+        # time.sleep(1)
 
         while True:
-            self.command_q.put({'A': 2266, 'B': 1724, 'C': 1824, 'D': 1519, 'E': 2178, 'F': 1227, 'G': 430, 'H': 1973})
+            self.command_q.put({'A': 2266, 'B': 1724, 'C': 3800, 'D': 1519, 'E': 2178, 'F': 1227, 'G': 2369, 'H': 1973})
             # self.command_q.put({'A': 2266, 'B': 1824, 'C': 2024, 'D': 1619, 'E': 2278, 'F': 1327, 'G': 630, 'H': 2073})
             time.sleep(1)
-            self.command_q.put({'A': 2166, 'B': 1724, 'C': 1824, 'D': 1519, 'E': 2278, 'F': 1227, 'G': 430, 'H': 1973})
-            # self.command_q.put({'A': 2166, 'B': 1724, 'C': 1824, 'D': 1519, 'E': 2178, 'F': 1227, 'G': 430, 'H': 1973})
-            # self.command_q.put({'A': 2066, 'B': 1624, 'C': 1824, 'D': 1419, 'E': 2078, 'F': 1127, 'G': 430, 'H': 1873})
+            self.command_q.put({'A': 2166, 'B': 1724, 'C': 3800, 'D': 1519, 'E': 2078, 'F': 1227, 'G': 2369, 'H': 1973})
+            # self.command_q.put({'A': 2066, 'B': 1624, 'C': 3700, 'D': 1419, 'E': 2078, 'F': 1127, 'G': 2269, 'H': 1873})
             time.sleep(1)
 
 if __name__ == "__main__":
     command_q = Queue(maxsize=10)
-    command_q.put({'A': 2166, 'B': 1724, 'C': 1824, 'D': 1519, 'E': 2178, 'F': 1227, 'G': 430, 'H': 1973})
+    command_q.put({'A': 2166, 'B': 1724, 'C': 3800, 'D': 1519, 'E': 2178, 'F': 1227, 'G': 2369, 'H': 1973})
     com = Com(port="/dev/ttyUSB4", command_q=command_q, output=True)
+    # com.socket.rs485_mode = serial.rs485.RS485Settings()
     pos_publish = PosPublish(command_q=command_q, output=True)
     # com.run()
     com.start()
