@@ -1,6 +1,4 @@
-import time
-from a1_motor_control import *
-import math
+from python.useless.a1_motor_control import *
 
 # A1电机请用扩展坞接到Orin左下角的USB插口，并不要交换四个转接器的位置！
 # 串口ID：0左腿，1左髋，2右髋，3右腿

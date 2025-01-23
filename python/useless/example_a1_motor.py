@@ -1,6 +1,6 @@
 import time
 import sys
-sys.path.append('../lib')
+sys.path.append('../../lib')
 from unitree_actuator_sdk import *
 
 

@@ -1,6 +1,4 @@
-import time
-from a1_motor_control import *
-import math
+from python.useless.a1_motor_control import *
 
 # A1电机请用扩展坞接到Orin左下角的USB插口，并不要交换四个转接器的位置！
 # 串口ID：0左腿，1左髋，2右髋，3右腿
@@ -29,6 +27,11 @@ motor9 = A1_Motor(serial_id=3, motor_id=1,
                 mode=params.ModeType.STOP, reduction_ratio=9.1, pos_init_offset=-0.8)
 motor10 = A1_Motor(serial_id=3, motor_id=2,
                 mode=params.ModeType.STOP, reduction_ratio=9.1, pos_init_offset=-1.4)
+
+# test debug
+motor11 = A1_Motor(serial_id=5, motor_id=0,
+                   mode=params.ModeType.STOP, reduction_ratio=9.1, pos_init_offset=-1.4)
+
 
 # motor： 1左腿侧抬腿，2左膝盖前后，3左脚踝,4左腿旋转，5左大腿上抬，6右腿旋转，7右大腿上抬，8右腿侧抬腿，9右膝盖前后，10右脚踝
 
@@ -77,14 +80,14 @@ if __name__ == '__main__':
     # motor_pos_init(motor9)
     # motor_pos_init(motor10)
 
-    motors = [motor1, motor2, motor3, motor4, motor5, motor6, motor7, motor8, motor9, motor10]
+    motors = [motor1, motor2, motor3, motor4, motor5, motor6, motor7, motor8, motor9, motor10, motor11]
     for motor in motors:
         motor.ReadData()
         time.sleep(0.01)
     time.sleep(0.1)
 
     # motor： 1左腿侧抬腿，2左膝盖前后，3左脚踝,4左腿旋转，5左大腿上抬，6右腿旋转，7右大腿上抬，8右腿侧抬腿，9右膝盖前后，10右脚踝
-    motor_test = motor10
+    motor_test = motor11
 
     motor_test.SetParams(0.2/26.07, 0.01*100)
     motor_test.ReadData()

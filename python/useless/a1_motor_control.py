@@ -4,7 +4,7 @@ import time
 import sys
 import os
 from a1_parameters_setting import A1_Params
-sys.path.append('../lib')
+sys.path.append('../../lib')
 from unitree_actuator_sdk import *
 
 
