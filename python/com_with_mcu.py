@@ -153,7 +153,7 @@ class PosPublish(Process):
 if __name__ == "__main__":
     command_q = Queue(maxsize=10)
     command_q.put({'A': 2166, 'B': 1724, 'C': 3800, 'D': 1519, 'E': 2178, 'F': 1227, 'G': 2369, 'H': 1973})
-    com = Com(port="/dev/my485serial5", command_q=command_q, output=True)
+    com = Com(port="/dev/my485serial_mcu", command_q=command_q, output=True)
     pos_publish = PosPublish(command_q=command_q, output=True)
     com.start()
     pos_publish.start()
