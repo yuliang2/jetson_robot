@@ -11,6 +11,7 @@ import yaml
 import typing
 import copy
 import enum
+import concurrent
 
 from unitree_actuator_sdk import *
 
@@ -32,17 +33,16 @@ for handle in logger.handlers:
 
 
 class MotorManager(object):
-    transfer_thread: threading.Thread | None = None
+    worker_thread: threading.Thread | None = None
+    transfer_thread_pool: concurrent.futures.ThreadPoolExecutor | None = None
     cmd_interval_ms: int
-    motor_dict: dict[MotorInstance] = dict()
-    motor_cmds: dict[str, MotorCmd] = dict()
+    motor_dict: dict[str, MotorInstance] = dict()
+    motor_group_dict: dict[str, list[MotorInstance]] = dict()
     loop_flag: bool = False
-
-    motor_data: dict[str, MotorData] = dict()
 
     task_list: dict[str, typing.Callable] = dict()
 
-    motor_data_callback_list: list[typing.Callable] = list()
+    motor_notify_callback_list: list[typing.Callable] = list()
 
     def __init__(self, cmd_interval_ms: int):
         self.cmd_interval_ms = cmd_interval_ms
@@ -58,8 +58,9 @@ class MotorManager(object):
         name = motor.get_motor_name()
         self.motor_dict[name] = motor
         motor.reset()
-        self.motor_cmds[name] = motor.get_motor_cmd()
-        self.motor_data[name] = motor.get_motor_data()
+        for name, motor in self.motor_dict.items():
+            group_name = name.split("-")[0]
+            self.motor_group_dict[group_name] = self.motor_group_dict.get(group_name, list()).append(motor)
         return name
 
     def get_motor(self, motor_name: str) -> MotorInstance:
@@ -71,31 +72,31 @@ class MotorManager(object):
         self.task_list[task_name] = task
         return task_name
 
-    def update_motor_cmds(self, motor_cmds: dict[str, MotorCmd]):
-        self.motor_cmds = motor_cmds
-
     @staticmethod
     def transfer_motor_cmds_task(self: "MotorManager"):
-        motor_cmds = self.motor_cmds
-        motor_data = {}
-        for name, motor_cmd in motor_cmds.items():
-            motor_instance = self.motor_dict.get(name)
-            if motor_instance is None:
-                continue
-            motor_data[name] = motor_instance.sendrecv(motor_cmd)
-        self.motor_data = motor_data
+
+        def _inner_transfer_task(motor_list: list[MotorInstance]):
+            for motor in motor_list:
+                try:
+                    motor.execute()
+                except Exception as e:
+                    logger.warning(f"motor: {motor.get_motor_name()} tranfer error: {traceback.format_exc()}")
+
+        with self.transfer_thread_pool as executor:
+            futures = [executor.submit(_inner_transfer_task, motor_list) for motor_list in self.motor_group_dict.values()]
+            # wait for execute done
+            concurrent.futures.as_completed(futures)
 
     @staticmethod
     def notify_motor_data_task(self: "MotorManager"):
-        notify_data = self.motor_data
-        for callback in self.motor_data_callback_list:
+        for callback in self.motor_notify_callback_list:
             try:
-                callback(notify_data)
+                callback(self.motor_dict)
             except Exception as e:
                 logger.warning(f"notify data callback error: {traceback.format_exc()}")
 
     def add_motor_data_callback(self, callback: typing.Callable):
-        self.motor_data_callback_list.append(callback)
+        self.motor_notify_callback_list.append(callback)
 
     def init_record_csv(self):
         if not os.path.exists(base_dir + "/record"):
@@ -111,26 +112,26 @@ class MotorManager(object):
         if self.recorder is None:
             return
         timestamp = int(time.time() * 1000)
-        notify_data = self.motor_data
-        for name, data in notify_data.items():
+        for name, motor in self.motor_dict.items():
             self.recorder.writerow(
                 {
                     timestamp: timestamp,
                     "motor_name": name,
-                    "tau": data.tau,
-                    "dq": data.dq,
-                    "q": data.q,
+                    "tau": motor.tau,
+                    "dq": motor.dq,
+                    "q": motor.q,
                 }
             )
 
     def run(self):
         self.loop_flag = True
-        self.transfer_thread = threading.Thread(target=self.loop)
-        self.transfer_thread.start()
+        self.transfer_thread_pool = concurrent.futures.ThreadPoolExecutor(max_workers=len(self.motor_group_dict))
+        self.worker_thread = threading.Thread(target=self.loop)
+        self.worker_thread.start()
 
     def stop(self):
         self.stop_without_join()
-        self.transfer_thread.join()
+        self.worker_thread.join()
 
     def stop_without_join(self):
         self.loop_flag = False

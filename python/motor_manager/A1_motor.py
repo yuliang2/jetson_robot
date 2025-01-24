@@ -161,6 +161,12 @@ class A1Motor(MotorInstance):
         self.init_motor_cmd()
         self.init_motor_data()
         self.readonly()
+        # pos set to default
+        self.motor_mode = MotorMode.FOC
+        self.tau = self.tau
+        self.q = self.q
+        self.dq = self.dq
+        self.execute()
 
     @timeit
     def readonly(self):
@@ -169,9 +175,9 @@ class A1Motor(MotorInstance):
     def get_motor_name(self):
         return self.motor_name
 
-    def set_pos(self, pos):
-        self.q = pos
-        self.sendrecv(self.motor_cmd)
+    @timeit
+    def execute(self):
+        self.serial.sendRecv(self.motor_cmd, self.motor_data)
 
     @timeit
     def sendrecv(self, cmd: MotorCmd) -> MotorData:

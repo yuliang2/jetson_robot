@@ -19,6 +19,9 @@ class MotorInstance(object):
     def readonly(self):
         pass
 
+    def execute(self):
+        pass
+
     def sendrecv(self, cmd: MotorCmd) -> MotorData:
         pass
 

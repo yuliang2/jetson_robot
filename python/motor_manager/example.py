@@ -15,19 +15,17 @@ motor01_name = manager.register_motor(A1Motor("/dev/my485serial0", 1))
 motor10_name = manager.register_motor(A1Motor("/dev/my485serial1", 0))
 
 
-def process_motor_data(name_to_motor_data: dict[str, MotorData]):
+def process_motor_response(name_to_motor: dict[str, A1Motor]):
     # do something you want, eg:
-    obs_tensor = [data for _, data in name_to_motor_data.items()]
+    obs_tensor = [motor.q for _, motor in name_to_motor.items()]
     new_action = policy(obs_tensor).detach().numpy().squeeze()
-    new_cmds_dict = {}
     i = 0
-    for name, motor in name_to_motor_data.items():
-        new_cmds_dict[name] = new_action[i]
-        i = i + 1
-    manager.update_motor_cmds(new_cmds_dict)
+    for motor in name_to_motor.values():
+        motor.q = new_action[i]
+        i += 1
 
 
-manager.add_motor_data_callback(process_motor_data)
+manager.add_motor_data_callback(process_motor_response)
 
 manager.run()
 

@@ -27,9 +27,10 @@ motors = [motor1, motor2, motor3, motor4, motor5, motor6, motor7, motor8, motor9
 for motor in motors:
     manager.register_motor(motor)
 
-def process_motor_data(name_to_motor_data: dict[str, MotorData]):
-    for name, data in name_to_motor_data.items():
-        print(f"{name}, tau: {data.tau}, temp: {data.temp}, dq: {data.dq}, q:{data.q}")
+
+def process_motor_data(name_to_motor: dict[str, A1Motor]):
+    for name, motor in name_to_motor.items():
+        print(f"{name}, tau: {motor.tau}, temp: {motor.temp}, dq: {motor.dq}, q:{motor.q}")
 
 
 manager.add_motor_data_callback(process_motor_data)
