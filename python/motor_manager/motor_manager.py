@@ -11,7 +11,7 @@ import yaml
 import typing
 import copy
 import enum
-import concurrent
+import concurrent.futures
 
 from unitree_actuator_sdk import *
 
