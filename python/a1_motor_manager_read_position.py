@@ -20,8 +20,8 @@ motor5 = A1Motor("/dev/my485serial1", 1, kp=0.2, kd=0.01)
 motor6 = A1Motor("/dev/my485serial2", 0, kp=0.2, kd=0.01)
 motor7 = A1Motor("/dev/my485serial2", 1, kp=0.2, kd=0.01)
 motor8 = A1Motor("/dev/my485serial3", 0, kp=0.2, kd=0.01)
-motor9 = A1Motor("/dev/my485serial0", 1, kp=0.2, kd=0.01)
-motor10 = A1Motor("/dev/my485serial0", 2, kp=0.2, kd=0.01)
+motor9 = A1Motor("/dev/my485serial3", 1, kp=0.2, kd=0.01)
+motor10 = A1Motor("/dev/my485serial3", 2, kp=0.2, kd=0.01)
 
 motors = [motor1, motor2, motor3, motor4, motor5, motor6, motor7, motor8, motor9, motor10]
 for motor in motors:

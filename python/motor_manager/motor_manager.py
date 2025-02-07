@@ -60,7 +60,9 @@ class MotorManager(object):
         motor.reset()
         for name, motor in self.motor_dict.items():
             group_name = name.split("-")[0]
-            self.motor_group_dict[group_name] = self.motor_group_dict.get(group_name, list()).append(motor)
+            motor_group = self.motor_group_dict.get(group_name, list())
+            motor_group.append(motor)
+            self.motor_group_dict[group_name] = motor_group
         return name
 
     def get_motor(self, motor_name: str) -> MotorInstance:
