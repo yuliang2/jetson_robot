@@ -52,7 +52,8 @@ class MotorManager(object):
         # self.register_task(MotorManager.record_csv_file_task, task_name="RecordCSV")
 
     def __del__(self):
-        pass
+        if self.transfer_thread_pool:
+            self.transfer_thread_pool.shutdown(wait=True)
 
     def register_motor(self, motor: MotorInstance):
         name = motor.get_motor_name()
@@ -84,10 +85,9 @@ class MotorManager(object):
                 except Exception as e:
                     logger.warning(f"motor: {motor.get_motor_name()} tranfer error: {traceback.format_exc()}")
 
-        with self.transfer_thread_pool as executor:
-            futures = [executor.submit(_inner_transfer_task, motor_list) for motor_list in self.motor_group_dict.values()]
-            # wait for execute done
-            concurrent.futures.as_completed(futures)
+        futures = [self.transfer_thread_pool.submit(_inner_transfer_task, motor_list) for motor_list in self.motor_group_dict.values()]
+        # wait for execute done
+        concurrent.futures.as_completed(futures)
 
     @staticmethod
     def notify_motor_data_task(self: "MotorManager"):
