@@ -36,10 +36,10 @@ def onUpdate(deviceModel):
     :param deviceModel: 设备模型    Device model
     :return:
     """
-    print("加速度：{:8.4f},{:8.4f},{:8.4f}".format(deviceModel.getDeviceData("accX"), deviceModel.getDeviceData("accY"), deviceModel.getDeviceData("accZ")), end="\t")
+    print("\r加速度：{:8.4f},{:8.4f},{:8.4f}".format(deviceModel.getDeviceData("accX"), deviceModel.getDeviceData("accY"), deviceModel.getDeviceData("accZ")), end="\t")
     print("角速度：{:8.3f},{:8.3f},{:8.3f}".format(deviceModel.getDeviceData("gyroX"), deviceModel.getDeviceData("gyroY"), deviceModel.getDeviceData("gyroZ")), end="\t")
     print("角度：{:8.3f},{:8.3f},{:8.3f}".format(deviceModel.getDeviceData("angleX"), deviceModel.getDeviceData("angleY"), deviceModel.getDeviceData("angleZ")), end="\t")
-    print("四元数：{:8.5f},{:8.5f},{:8.5f}".format(deviceModel.getDeviceData("q1"), deviceModel.getDeviceData("q2"), deviceModel.getDeviceData("q3"), deviceModel.getDeviceData("q4")))
+    print("四元数：{:8.5f},{:8.5f},{:8.5f}".format(deviceModel.getDeviceData("q1"), deviceModel.getDeviceData("q2"), deviceModel.getDeviceData("q3"), deviceModel.getDeviceData("q4")), end='')
 
 
 if __name__ == '__main__':
