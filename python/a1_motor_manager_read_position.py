@@ -24,16 +24,10 @@ motor9 = A1Motor("/dev/my485serial3", 1, kp=0.2, kd=0.01)
 motor10 = A1Motor("/dev/my485serial3", 2, kp=0.2, kd=0.01)
 
 #motors = [motor1, motor4, motor7]
-motors = [motor1, motor2, motor3, motor4, motor5, motor6, motor7, motor8, motor9, motor10]
+motors = [motor1, motor2, motor3]
 for i, motor in enumerate(motors):
-    if i < 1:
-        manager.register_motor(motor, group_name='0')
-    elif i < 2:
-        manager.register_motor(motor, group_name='0')
-    elif i < 3:
-        manager.register_motor(motor, group_name='1')
-    else:
-        manager.register_motor(motor, group_name='1')
+    manager.register_motor(motor)
+
 
 def process_motor_data(name_to_motor_data: dict[str, MotorData]):
     for name, data in name_to_motor_data.items():
