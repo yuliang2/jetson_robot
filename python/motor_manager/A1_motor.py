@@ -54,6 +54,7 @@ class A1Motor(MotorInstance):
         self._kd = kd
         self.init_motor_cmd()
         self.init_motor_data()
+        self.readonly()
 
     def init_motor_cmd(self):
         motor_cmd = MotorCmd()

@@ -12,8 +12,10 @@ from motor_manager.motor_manager import MotorManager
 # init manager with 20ms(50hz)
 manager = MotorManager(20)
 
-motor10 = A1Motor("/dev/my485serial5", 0, kp=0.2, kd=0.01, mode=MotorMode.FOC)
-motor10.tau = 0.2
+# A1电机请用扩展坞接到Orin左下角的USB插口，并不要交换四个转接器的位置！
+# 串口ID：0左腿，1左髋，2右髋，3右腿
+# motor： 1左腿侧抬腿，2左膝盖前后，3左脚踝,4左腿旋转，5左大腿上抬，6右腿旋转，7右大腿上抬，8右腿侧抬腿，9右膝盖前后，10右脚踝
+motor10 = A1Motor("/dev/my485serial0", 3, kp=0.2, kd=0.01, mode=MotorMode.FOC)
 
 motor10_name = manager.register_motor(motor10)
 # motor01_name = manager.register_motor(A1Motor("/dev/my485serial0", 1))

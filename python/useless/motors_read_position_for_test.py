@@ -1,4 +1,4 @@
-from python.useless.a1_motor_control import *
+from a1_motor_control import *
 
 # A1电机请用扩展坞接到Orin左下角的USB插口，并不要交换四个转接器的位置！
 # 串口ID：0左腿，1左髋，2右髋，3右腿
@@ -37,5 +37,4 @@ while True:
         motor.ReadData()
         print('motor{}:{:.3f}'.format(i, motor.data.q / motor.reduction_ratio), end=' ')
         # print('motor{}:{:.3f}'.format(i, motor.data.q), end=' ')
-        time.sleep(0.1)
     print('')
