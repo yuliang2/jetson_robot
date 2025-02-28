@@ -2,6 +2,7 @@ import os
 import sys
 import time
 import multiprocessing as mp
+from multiprocessing import Process, Queue
 from collections import deque
 import math
 import cv2
@@ -14,6 +15,7 @@ from unitree_actuator_sdk import *
 from motor_manager.A1_motor import A1Motor
 from motor_manager.motor_manager import MotorManager
 from hpe.yolo_pose import PoseEstimator
+from com_with_mcu import *
 
 # 共享电机配置（使用Manager创建共享字典）
 MOTOR_CONFIGS = [
@@ -29,6 +31,8 @@ MOTOR_CONFIGS = [
     ("/dev/my485serial3", 1, 0.2, 0.01, 0.154, -0.7, 0.8, "right_knee"),
     ("/dev/my485serial3", 2, 0.2, 0.01, 0.108, -0.8, 0.5, "右脚踝")
 ]
+
+mcu_command_q = Queue(maxsize=10)
 
 
 class EnhancedMotorController:
@@ -193,11 +197,19 @@ def realsense_process(shared_targets):
 
             annotated_frame, angles = pose_estimator.inference(color_image)
             if angles:
+                print(angles)
                 new_targets = {}
                 for config in MOTOR_CONFIGS:
                     name = config[7]
                     if name in angles:
                         new_targets[name] = math.radians(angles[name] - 180)*2 + config[4]
+
+                if 'left_elbow' in angles:
+                    new_targets['A'] = int(-(angles['left_elbow'] - 180)/180.0*2048.0 + 2266)
+
+                if 'right_elbow' in angles:
+                    new_targets['E'] = int(-(angles['right_elbow'] - 180)/180.0*2048.0 + 2178)
+
 
                 # 更新共享目标（无需额外加锁）
                 shared_targets.update(new_targets)
@@ -212,23 +224,48 @@ def realsense_process(shared_targets):
         # Stop streaming
         pipeline.stop()
 
+def mcu_process(shared_targets, command_q):
+    arm_targets = {'A': 2266, 'B': 1724, 'C': 3800, 'D': 1519, 'E': 2178, 'F': 1227, 'G': 1706, 'H': 2070}
+    shared_targets.update(arm_targets)
+    command_q.put(arm_targets)
+
+    lock = mp.Lock()
+    try:
+        while True:
+            with lock:
+                if 'A' in shared_targets:
+                    arm_targets['A'] = shared_targets['A']
+                if 'E' in shared_targets:
+                    arm_targets['E'] = shared_targets['E']
+            command_q.put(arm_targets)
+            print(arm_targets)
+            time.sleep(0.1)
+
+    finally:
+        arm_targets = {'A': 2266, 'B': 1724, 'C': 3800, 'D': 1519, 'E': 2178, 'F': 1227, 'G': 1706, 'H': 2070}
+        command_q.put(arm_targets)
+
 
 if __name__ == '__main__':
     # 创建共享数据
     with mp.Manager() as manager:
         shared_targets = manager.dict()
-
+        command_q = Queue(maxsize=10)
+        com_with_mcu = ComWithMCU(port="/dev/my485serial_mcu", command_q=command_q, output=True)
         # 创建进程
         processes = [
             mp.Process(target=control_process, args=(shared_targets,)),
             # mp.Process(target=video_process, args=(shared_targets,))
-            mp.Process(target=realsense_process, args=(shared_targets,))
+            mp.Process(target=realsense_process, args=(shared_targets,)),
+            mp.Process(target=mcu_process, args=(shared_targets,command_q)),
         ]
 
         # 启动进程
         for p in processes:
             p.daemon = True
             p.start()
+
+        com_with_mcu.start()
 
         # 主进程监控
         try:

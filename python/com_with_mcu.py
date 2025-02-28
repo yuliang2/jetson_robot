@@ -29,7 +29,7 @@ def calculate_crc(data):
         crc &= 0xFF
     return crc
 
-class Com(Process):
+class ComWithMCU(Process):
 
     def __init__(self, port=None, status_qs=None, command_q=None, output=False, log_q=None):
         Process.__init__(self)
@@ -153,9 +153,9 @@ class PosPublish(Process):
 if __name__ == "__main__":
     command_q = Queue(maxsize=10)
     command_q.put({'A': 2166, 'B': 1724, 'C': 3800, 'D': 1519, 'E': 2178, 'F': 1227, 'G': 1706, 'H': 2070})
-    com = Com(port="/dev/my485serial_mcu", command_q=command_q, output=True)
+    com_with_mcu = ComWithMCU(port="/dev/my485serial_mcu", command_q=command_q, output=True)
     pos_publish = PosPublish(command_q=command_q, output=True)
-    com.start()
+    com_with_mcu.start()
     pos_publish.start()
-    com.join()
+    com_with_mcu.join()
     pos_publish.join()
