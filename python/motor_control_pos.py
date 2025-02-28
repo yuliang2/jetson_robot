@@ -5,6 +5,8 @@ import multiprocessing as mp
 from collections import deque
 import math
 import cv2
+import pyrealsense2 as rs
+import numpy as np
 
 sys.path.append('../lib')
 
@@ -17,7 +19,7 @@ from hpe.yolo_pose import PoseEstimator
 MOTOR_CONFIGS = [
     # 格式：serial_port, motor_id, kp, kd, init_pos, min_limit, max_limit, motor_name
     ("/dev/my485serial0", 0, 0.2, 0.01, 0.227, 0.1, 0.7, "左腿侧抬腿"),
-    ("/dev/my485serial0", 1, 0.2, 0.01, 0.429, -0.25, 1.3, "left_knee"),
+    ("/dev/my485serial0", 1, 0.2, 0.01, 0.429, -0.25, 1.8, "left_knee"),
     ("/dev/my485serial0", 2, 0.2, 0.01, 0.095, -0.5, 0.8, "左脚踝"),
     ("/dev/my485serial1", 0, 0.2, 0.01, 0.137, -0.2, 0.4, "左腿旋转"),
     ("/dev/my485serial1", 1, 0.2, 0.01, 0.177, 0.1, 0.8, "左大腿上抬"),
@@ -116,7 +118,7 @@ def control_process(shared_targets):
         time.sleep(max(0.0, 0.01 - elapsed))
 
 
-def vision_process(shared_targets):
+def video_process(shared_targets):
     pose_estimator = PoseEstimator()
     # cap = cv2.VideoCapture(4)
     # cap.set(5, 30)
@@ -147,6 +149,69 @@ def vision_process(shared_targets):
     cap.release()
     cv2.destroyAllWindows()
 
+def realsense_process(shared_targets):
+    # Configure depth and color streams
+    pipeline = rs.pipeline()
+    config = rs.config()
+
+    # Get device product line for setting a supporting resolution
+    pipeline_wrapper = rs.pipeline_wrapper(pipeline)
+    pipeline_profile = config.resolve(pipeline_wrapper)
+    device = pipeline_profile.get_device()
+    device_product_line = str(device.get_info(rs.camera_info.product_line))
+
+    found_rgb = False
+    for s in device.sensors:
+        if s.get_info(rs.camera_info.name) == 'RGB Camera':
+            found_rgb = True
+            break
+    if not found_rgb:
+        print("The program requires Depth camera with Color sensor")
+        exit(0)
+
+    config.enable_stream(rs.stream.depth, 640, 480, rs.format.z16, 30)
+
+    if device_product_line == 'L500':
+        config.enable_stream(rs.stream.color, 960, 540, rs.format.bgr8, 30)
+    else:
+        config.enable_stream(rs.stream.color, 640, 480, rs.format.bgr8, 30)
+
+    pose_estimator = PoseEstimator()
+
+    # Start streaming
+    pipeline.start(config)
+
+    try:
+        while True:
+            frames = pipeline.wait_for_frames()
+            color_frame = frames.get_color_frame()
+            if not color_frame:
+                continue
+
+            # Convert images to numpy arrays
+            color_image = np.asanyarray(color_frame.get_data())
+
+            annotated_frame, angles = pose_estimator.inference(color_image)
+            if angles:
+                new_targets = {}
+                for config in MOTOR_CONFIGS:
+                    name = config[7]
+                    if name in angles:
+                        new_targets[name] = math.radians(angles[name] - 180)*2 + config[4]
+
+                # 更新共享目标（无需额外加锁）
+                shared_targets.update(new_targets)
+                print(shared_targets)
+
+            # Show images
+            cv2.imshow('annotated_frame', annotated_frame)
+            if cv2.waitKey(1) & 0xFF == ord('q'):
+                break
+
+    finally:
+        # Stop streaming
+        pipeline.stop()
+
 
 if __name__ == '__main__':
     # 创建共享数据
@@ -156,7 +221,8 @@ if __name__ == '__main__':
         # 创建进程
         processes = [
             mp.Process(target=control_process, args=(shared_targets,)),
-            mp.Process(target=vision_process, args=(shared_targets,))
+            # mp.Process(target=video_process, args=(shared_targets,))
+            mp.Process(target=realsense_process, args=(shared_targets,))
         ]
 
         # 启动进程
