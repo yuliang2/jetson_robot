@@ -143,16 +143,16 @@ class PosPublish(Process):
         log("位置发布进程启动")
 
         while True:
-            self.command_q.put({'A': 2266, 'B': 1724, 'C': 3800, 'D': 1519, 'E': 2178, 'F': 1227, 'G': 2369, 'H': 1973})
+            self.command_q.put({'A': 2266, 'B': 1724, 'C': 3800, 'D': 1519, 'E': 2178, 'F': 1227, 'G': 1706, 'H': 2070})
             # self.command_q.put({'A': 2266, 'B': 1824, 'C': 2024, 'D': 1619, 'E': 2278, 'F': 1327, 'G': 630, 'H': 2073})
             time.sleep(1)
-            self.command_q.put({'A': 2166, 'B': 1724, 'C': 3800, 'D': 1519, 'E': 2078, 'F': 1227, 'G': 2369, 'H': 1973})
+            self.command_q.put({'A': 2166, 'B': 1724, 'C': 3800, 'D': 1519, 'E': 2078, 'F': 1227, 'G': 1706, 'H': 2070})
             # self.command_q.put({'A': 2066, 'B': 1624, 'C': 3700, 'D': 1419, 'E': 2078, 'F': 1127, 'G': 2269, 'H': 1873})
             time.sleep(1)
 
 if __name__ == "__main__":
     command_q = Queue(maxsize=10)
-    command_q.put({'A': 2166, 'B': 1724, 'C': 3800, 'D': 1519, 'E': 2178, 'F': 1227, 'G': 2369, 'H': 1973})
+    command_q.put({'A': 2166, 'B': 1724, 'C': 3800, 'D': 1519, 'E': 2178, 'F': 1227, 'G': 1706, 'H': 2070})
     com = Com(port="/dev/my485serial_mcu", command_q=command_q, output=True)
     pos_publish = PosPublish(command_q=command_q, output=True)
     com.start()
