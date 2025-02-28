@@ -210,6 +210,12 @@ def realsense_process(shared_targets):
                 if 'right_elbow' in angles:
                     new_targets['E'] = int(-(angles['right_elbow'] - 180)/180.0*2048.0 + 2178)
 
+                if 'left_shoulder' in angles:
+                    new_targets['C'] = int(-angles['left_shoulder']/180.0*2048.0) + 3800
+
+                if 'right_shoulder' in angles:
+                    new_targets['G'] = int(angles['right_shoulder']/180.0*2048.0) + 1706
+
 
                 # 更新共享目标（无需额外加锁）
                 shared_targets.update(new_targets)
@@ -233,10 +239,11 @@ def mcu_process(shared_targets, command_q):
     try:
         while True:
             with lock:
-                if 'A' in shared_targets:
-                    arm_targets['A'] = shared_targets['A']
-                if 'E' in shared_targets:
-                    arm_targets['E'] = shared_targets['E']
+                keys = arm_targets.keys()
+                for key in keys:
+                    if key in shared_targets:
+                        arm_targets[key] = shared_targets[key]
+
             command_q.put(arm_targets)
             print(arm_targets)
             time.sleep(0.1)

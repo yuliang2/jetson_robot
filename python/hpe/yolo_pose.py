@@ -30,6 +30,12 @@ class PoseEstimator:
         if keypoints[6][1] > 0.1 and keypoints[8][1] > 0.1 and keypoints[10][1] > 0.1:
             angles['right_elbow'] = self.calculate_angle(keypoints[6], keypoints[8], keypoints[10])
 
+        if keypoints[7][1] > 0.1 and keypoints[5][1] > 0.1 and keypoints[11][1] > 0.1:
+            angles['left_shoulder'] = self.calculate_angle(keypoints[7], keypoints[5], keypoints[11])
+
+        if keypoints[8][1] > 0.1 and keypoints[6][1] > 0.1 and keypoints[12][1] > 0.1:
+            angles['right_shoulder'] = self.calculate_angle(keypoints[8], keypoints[6], keypoints[12])
+
         if keypoints[11][1] > 0.1 and keypoints[13][1] > 0.1 and keypoints[15][1] > 0.1:
             angles['left_knee'] = self.calculate_angle(keypoints[11], keypoints[13], keypoints[15])
 
